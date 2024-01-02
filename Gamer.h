@@ -16,6 +16,8 @@
 #include <csignal>
 #include <cerrno>
 
+#define MSG_LEN 16
+
 class Gamer {
 private:
     ///w-hore, s-dole, a-vlavo, d-vpravo
@@ -54,8 +56,8 @@ public:
         char msg[256];
         bool run = true;
         while(run) {
-            bzero(buffer, 256);
-            status = read(hrac->getNewsockfd(), buffer, 255);       //citanie zo socketu (cakanie) mozno zmenit pocet prijimanych bytov
+            bzero(buffer, MSG_LEN);
+            status = read(hrac->getNewsockfd(), buffer, MSG_LEN);       //citanie zo socketu (cakanie) mozno zmenit pocet prijimanych bytov
             if (status < 0) {
                 perror("Error reading from socket\n");
                 return NULL;
@@ -102,11 +104,11 @@ public:
             }
             pthread_mutex_unlock(hrac->getMutexKoniec());
 
-            bzero(msg, 256);
+            bzero(msg, MSG_LEN);
 
             if (!run) {
                 msg[1] = 'E';
-                status = write(hrac->getNewsockfd(), msg, 255);        //poslanie informacie klientovi
+                status = write(hrac->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
                 //printf("Posielanie E na socket %d\n", hrac->getNewsockfd());
                 if (status < 0) {
                     perror("Error writing to socket\n");

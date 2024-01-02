@@ -2,6 +2,7 @@
 #include "Gamer.h"
 
 
+
 //Server
 int main(int argc, char *argv[]) {
 
@@ -30,13 +31,13 @@ int main(int argc, char *argv[]) {
     if (hrac1->getSuccConnection() && hrac2->getSuccConnection()) {
         bool run = true;
         int status;
-        char msg[256];
+        char msg[MSG_LEN];
         while (run) {
-            bzero(msg, 256);
+            bzero(msg, MSG_LEN);
             pthread_mutex_lock(&mutSmer1);      //hrac1 input pre hraca2
             msg[2] = hrac1->getAktSmer();   //kriticka cast
             pthread_mutex_unlock(&mutSmer1);
-            status = write(hrac2->getNewsockfd(), msg, 256);        //poslanie informacie druhemu klientovi
+            status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
             if (status < 0) {
                 if (errno == EPIPE) {
                     //printf("broken pipe1\n");
@@ -49,11 +50,11 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            bzero(msg, 256);
+            bzero(msg, MSG_LEN);
             pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
             msg[2] = hrac2->getAktSmer();   //kriticka cast
             pthread_mutex_unlock(&mutSmer2);
-            status = write(hrac1->getNewsockfd(), msg, 256);        //poslanie informacie druhemu klientovi
+            status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
             if (status < 0) {
                 if (errno == EPIPE) {
                     //printf("broken pipe2\n");
@@ -76,9 +77,9 @@ int main(int argc, char *argv[]) {
         }
 
         //oznamenie hracom ze hra sa skoncila
-        bzero(msg, 256);
+        bzero(msg, MSG_LEN);
         msg[1] = 'E';       //ukoncenie
-        status = write(hrac1->getNewsockfd(), msg, 255);        //poslanie informacie druhemu klientovi    strlen(msg) + 1
+        status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi    strlen(msg) + 1
         if (status < 0) {
             if (errno == EPIPE) {   //toto sa stane ked sa spojenie zrusi, cize uz klient vie ze sa ma hra vypnut 1
                 //printf("Broken pipeline2\n");
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]) {
                 return NULL;
             }
         }
-        status = write(hrac2->getNewsockfd(), msg, 255);        //poslanie informacie druhemu klientovi
+        status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
         if (status < 0) {
             if (errno == EPIPE) { //toto sa stane ked sa spojenie zrusi, cize uz klient vie ze sa ma hra vypnut 2
                 //printf("Broken pipeline2\n");
