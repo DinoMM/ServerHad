@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/ServerHad.dir/main.cpp.o -o ServerHad 
