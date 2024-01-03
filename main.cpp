@@ -28,7 +28,17 @@ int main(int argc, char *argv[]) {
 
     Gamer * hrac1 = new Gamer(&tHrac1, &mutSmer1, &mutKonec, uniPort, &koniecZberu);
     Gamer * hrac2 = new Gamer(&tHrac2, &mutSmer2, &mutKonec, uniPort + 1, &koniecZberu);
-    if (hrac1->getSuccConnection() && hrac2->getSuccConnection()) {
+
+    while (true) {
+        if (hrac1->getSuccConnection() && hrac2->getSuccConnection()) {
+            break;
+        }
+    }
+
+        printf("spustenie hry\n");
+        hrac1->startConnection();
+        hrac2->startConnection();
+
         bool run = true;
         int status;
         char msg[MSG_LEN];
@@ -99,9 +109,7 @@ int main(int argc, char *argv[]) {
         }
         //printf("preslo oznamenie vsetkym hracom\n");
 
-    } else {
-        perror("Error creating connection\n");
-    }
+
 
 
     //vyhodnotenie vysledkov z hry?

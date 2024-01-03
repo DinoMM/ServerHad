@@ -13,13 +13,22 @@ Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mu
     this->koniecZberu = koniecZberu;
 
     succConnection = connection();
+
+}
+
+void Gamer::startConnection() {
     if (succConnection) {
-        pthread_create(thread, NULL, Gamer::waitGetData, this);
+        char msg[MSG_LEN];
+        msg[1] = 'S';
+        int status = write(getNewsockfd(), msg, MSG_LEN);        //poslanie informacie o zacati hry
+        //printf("Posielanie S na socket %d\n",getNewsockfd());
+        if (status < 0) {
+            perror("Error writing to socket\n");
+            return;
+        }
 
+        pthread_create(thread, NULL, Gamer::waitGetData, this);     //vytvorenie vlakna
     }
-
-
-
 }
 
 char Gamer::getAktSmer() {

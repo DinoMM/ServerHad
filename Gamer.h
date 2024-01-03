@@ -47,13 +47,14 @@ public:
     bool getSuccConnection();
 
     bool connection();
+    void startConnection();
 
     static void * waitGetData(void * data) {
         Gamer * hrac = (Gamer *)data;
 
         int status;
-        char buffer[256];
-        char msg[256];
+        char buffer[MSG_LEN];
+        char msg[MSG_LEN];
         bool run = true;
         while(run) {
             bzero(buffer, MSG_LEN);
