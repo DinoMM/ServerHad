@@ -196,6 +196,34 @@ int main(int argc, char *argv[]) {
         }
 
     }
+
+    //poslanie score medzi dvomi hracami
+    bzero(msg, MSG_LEN);        //hrac 1 dostane score hraca 2
+    msg[1] = 'V';
+    msg[3] = hrac2->getScore() + '0';
+    status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
+    if (status < 0) {
+        if (errno == EPIPE) {
+            //broken pipe
+        }
+        perror("Error writing to socket\n");
+        return NULL;
+    }
+
+    bzero(msg, MSG_LEN); //hrac 2 dostane score hraca 1
+    msg[1] = 'V';
+    msg[3] = hrac1->getScore() + '0';
+    status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
+    if (status < 0) {
+        if (errno == EPIPE) {
+            //broken pipe
+        }
+        perror("Error writing to socket\n");
+        return NULL;
+    }
+
+
+
     std::string slovickoHrac1 = " ";
     std::string slovickoHrac2 = " ";
     if (hrac1->getScore() == 0 || hrac1->getScore() >= 5) {
