@@ -107,7 +107,7 @@ public:
 
             bzero(msg, MSG_LEN);
 
-            if (!run) {
+            /*if (!run) {
                 msg[1] = 'E';
                 status = write(hrac->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
                 //printf("Posielanie E na socket %d\n", hrac->getNewsockfd());
@@ -115,7 +115,7 @@ public:
                     perror("Error writing to socket\n");
                     return NULL;
                 }
-            }
+            }*/
 
         }
         return NULL;
