@@ -30,7 +30,9 @@ private:
     pthread_t * thread;
     pthread_mutex_t * mutSmer;
     pthread_mutex_t * mutKoniec;
+    pthread_mutex_t mutPlay;
     int score;
+    bool playing;
 
 
 public:
@@ -41,17 +43,22 @@ public:
     void setAktSmer(char novySmer);
     pthread_mutex_t * getMutexSmer();
     pthread_mutex_t * getMutexKoniec();
+    pthread_mutex_t * getMutexPlay();
     pthread_t * getThread();
     int getNewsockfd();
     int getSockfd();
     bool * getKoniecZberu();
     bool getSuccConnection();
     int getScore();
+    bool isPlaying();
+
+
 
     void setScore(int newScore);
 
     bool connection();
     void startConnection();
+
 
     static void * waitGetData(void * data) {
         Gamer * hrac = (Gamer *)data;
@@ -95,9 +102,14 @@ public:
 
             switch (buffer[1]) {        //spracovanie specialnych stavov (eventy v hre)
                 case 'E':       // pre stav ukoncenia hry (narazenie, ukoncenie hracom)
-                    pthread_mutex_lock(hrac->getMutexKoniec());
+                    /*pthread_mutex_lock(hrac->getMutexKoniec());
                     *hrac->getKoniecZberu() = true;                     //kriticka cast
-                    pthread_mutex_unlock(hrac->getMutexKoniec());
+                    pthread_mutex_unlock(hrac->getMutexKoniec());*/
+
+                    pthread_mutex_lock(hrac->getMutexPlay());
+                    hrac->playing = false;                     //kriticka cast
+                    pthread_mutex_unlock(hrac->getMutexPlay());
+
                     //printf("Zaznamenane E\n");
                     break;
                 case 'H':
@@ -114,13 +126,19 @@ public:
                             return NULL;
                         }
                         hrac->setScore(buffer[3] - '0');
+                        /*pthread_mutex_lock(hrac->getMutexKoniec());
+                        *hrac->getKoniecZberu() = true;                     //kriticka cast
+                        pthread_mutex_unlock(hrac->getMutexKoniec());*/
+                        pthread_mutex_lock(hrac->getMutexPlay());
+                        hrac->playing = false;                     //kriticka cast
+                        pthread_mutex_unlock(hrac->getMutexPlay());
                     }
                     break;
                 default: break;
             }
 
             pthread_mutex_lock(hrac->getMutexKoniec());
-            if (*hrac->getKoniecZberu()) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)
+            if (*hrac->getKoniecZberu() || !hrac->isPlaying()) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)
                 run = false;            //dokonci sa cyklus a ukonci sa beh prijimania
             }
             pthread_mutex_unlock(hrac->getMutexKoniec());

@@ -43,42 +43,45 @@ int main(int argc, char *argv[]) {
         int status;
         char msg[MSG_LEN];
         while (run) {
-            bzero(msg, MSG_LEN);
-            pthread_mutex_lock(&mutSmer1);      //hrac1 input pre hraca2
-            msg[2] = hrac1->getAktSmer();   //kriticka cast
-            pthread_mutex_unlock(&mutSmer1);
-            status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
-            if (status < 0) {
-                if (errno == EPIPE) {
-                    //printf("broken pipe1\n");
-                    pthread_mutex_lock(&mutKonec);
-                    koniecZberu = true;
-                    pthread_mutex_unlock(&mutKonec);
-                } else {
-                    perror("Error writing to socket\n");
-                    return NULL;
+            if (hrac1->isPlaying()) {
+                bzero(msg, MSG_LEN);
+                pthread_mutex_lock(&mutSmer1);      //hrac1 input pre hraca2
+                msg[2] = hrac1->getAktSmer();   //kriticka cast
+                pthread_mutex_unlock(&mutSmer1);
+                status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
+                if (status < 0) {
+                    if (errno == EPIPE) {
+                        //printf("broken pipe1\n");
+                        pthread_mutex_lock(&mutKonec);
+                        koniecZberu = true;
+                        pthread_mutex_unlock(&mutKonec);
+                    } else {
+                        perror("Error writing to socket\n");
+                        return NULL;
+                    }
                 }
             }
-
-            bzero(msg, MSG_LEN);
-            pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
-            msg[2] = hrac2->getAktSmer();   //kriticka cast
-            pthread_mutex_unlock(&mutSmer2);
-            status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
-            if (status < 0) {
-                if (errno == EPIPE) {
-                    //printf("broken pipe2\n");
-                    pthread_mutex_lock(&mutKonec);
-                    koniecZberu = true;
-                    pthread_mutex_unlock(&mutKonec);
-                } else {
-                    perror("Error writing to socket\n");
-                    return NULL;
+            if (hrac2->isPlaying()) {
+                bzero(msg, MSG_LEN);
+                pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
+                msg[2] = hrac2->getAktSmer();   //kriticka cast
+                pthread_mutex_unlock(&mutSmer2);
+                status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
+                if (status < 0) {
+                    if (errno == EPIPE) {
+                        //printf("broken pipe2\n");
+                        pthread_mutex_lock(&mutKonec);
+                        koniecZberu = true;
+                        pthread_mutex_unlock(&mutKonec);
+                    } else {
+                        perror("Error writing to socket\n");
+                        return NULL;
+                    }
                 }
             }
 
             pthread_mutex_lock(&mutKonec);
-            if (koniecZberu) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)
+            if (koniecZberu || (!hrac1->isPlaying() && !hrac2->isPlaying())) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)
                 run = false;
             }
             pthread_mutex_unlock(&mutKonec);
@@ -86,6 +89,7 @@ int main(int argc, char *argv[]) {
             usleep(100 * 1000);      //tick kazdych:- 33 ms (30 fps) - 100 ms (10 fps)
         }
 
+        printf("Posielanie ukoncenia hry hracom\n");
         //oznamenie hracom ze hra sa skoncila
         bzero(msg, MSG_LEN);
         msg[1] = 'E';       //ukoncenie

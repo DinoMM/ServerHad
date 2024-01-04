@@ -13,6 +13,9 @@ Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mu
     this->koniecZberu = koniecZberu;
     this->score = -1;
 
+    pthread_mutex_init(&mutPlay, NULL);
+    playing = true;
+
     succConnection = connection();
 
 }
@@ -62,10 +65,23 @@ bool Gamer::getSuccConnection() {
 int Gamer::getScore() {
     return this->score;
 }
+pthread_mutex_t * Gamer::getMutexPlay() {
+    return &this->mutPlay;
+}
+
 
 void Gamer::setScore(int newScore) {
     this->score = newScore;
 }
+
+bool Gamer::isPlaying() {
+    bool hodn = false;
+    pthread_mutex_lock(&mutPlay);
+    hodn = playing;
+    pthread_mutex_lock(&mutPlay);
+    return hodn;
+}
+
 
 bool Gamer::connection() {
     socklen_t cli_len;
@@ -105,5 +121,6 @@ bool Gamer::connection() {
 Gamer::~Gamer() {
     close(newsockfd);
     close(sockfd);
+    pthread_mutex_destroy(&mutPlay);
 
 }
