@@ -196,9 +196,33 @@ int main(int argc, char *argv[]) {
         }
 
     }
+    std::string slovickoHrac1 = " ";
+    std::string slovickoHrac2 = " ";
+    if (hrac1->getScore() == 0 || hrac1->getScore() >= 5) {
+        slovickoHrac1 = "bodov";
+    } else if (hrac1->getScore() == 1) {
+        slovickoHrac1 = "bod";
+    } else if (hrac1->getScore() > 1 && hrac1->getScore() < 5) {
+        slovickoHrac1 = "body";
+    }
 
-    printf("Score Hraca 1: %d  Score Hraca 2: %d\n", hrac1->getScore(), hrac2->getScore());
+    if (hrac2->getScore() == 0 || hrac2->getScore() >= 5) {
+        slovickoHrac2 = "bodov";
+    } else if (hrac2->getScore() == 1) {
+        slovickoHrac2 = "bod";
+    } else if (hrac2->getScore() > 1 && hrac2->getScore() < 5) {
+        slovickoHrac2 = "body";
+    }
 
+    printf("\n---------------------\nScore\nHrac 1: %d %s\nHrac 2: %d %s\n---------------------\n", hrac1->getScore(), slovickoHrac1.c_str(), hrac2->getScore(), slovickoHrac2.c_str());
+    if (hrac1->getScore() > hrac2->getScore()) {
+        printf("Vyhrava hrac 1 !!\n");
+    } else if (hrac1->getScore() < hrac2->getScore()) {
+        printf("Vyhrava hrac 2 !!\n");
+    } else {
+        printf("Remiza !!\n");
+    }
+    printf("---------------------\n\n");
     printf("Finalny koniec spojenia\n");
 
     pthread_mutex_destroy(&mutKonec);
@@ -206,6 +230,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_destroy(&mutSmer2);
     free(hrac1);
     free(hrac2);
+
 
     return 0;
 }

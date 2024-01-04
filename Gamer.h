@@ -136,13 +136,11 @@ public:
                     break;
                 default: break;
             }
-            printf("Pred\n");
             pthread_mutex_lock(hrac->getMutexKoniec());
             if (*hrac->getKoniecZberu() || !hrac->isPlaying()) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)
                 run = false;            //dokonci sa cyklus a ukonci sa beh prijimania
             }
             pthread_mutex_unlock(hrac->getMutexKoniec());
-            printf("Po\n");
             bzero(msg, MSG_LEN);
 
             /*if (!run) {
