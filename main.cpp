@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         int status;
         char msg[MSG_LEN];
         while (run) {
-            if (hrac1->isPlaying()) {
+
                 bzero(msg, MSG_LEN);
                 pthread_mutex_lock(&mutSmer1);      //hrac1 input pre hraca2
                 msg[2] = hrac1->getAktSmer();   //kriticka cast
@@ -60,25 +60,25 @@ int main(int argc, char *argv[]) {
                         return NULL;
                     }
                 }
-            }
-            if (hrac2->isPlaying()) {
-                bzero(msg, MSG_LEN);
-                pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
-                msg[2] = hrac2->getAktSmer();   //kriticka cast
-                pthread_mutex_unlock(&mutSmer2);
-                status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
-                if (status < 0) {
-                    if (errno == EPIPE) {
-                        //printf("broken pipe2\n");
-                        pthread_mutex_lock(&mutKonec);
-                        koniecZberu = true;
-                        pthread_mutex_unlock(&mutKonec);
-                    } else {
-                        perror("Error writing to socket\n");
-                        return NULL;
-                    }
+
+
+            bzero(msg, MSG_LEN);
+            pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
+            msg[2] = hrac2->getAktSmer();   //kriticka cast
+            pthread_mutex_unlock(&mutSmer2);
+            status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
+            if (status < 0) {
+                if (errno == EPIPE) {
+                    //printf("broken pipe2\n");
+                    pthread_mutex_lock(&mutKonec);
+                    koniecZberu = true;
+                    pthread_mutex_unlock(&mutKonec);
+                } else {
+                    perror("Error writing to socket\n");
+                    return NULL;
                 }
             }
+
 
             pthread_mutex_lock(&mutKonec);
             if (koniecZberu || (!hrac1->isPlaying() && !hrac2->isPlaying())) {              //kriticka cast pre prerusenie (koniec hry, narazenie a podob)

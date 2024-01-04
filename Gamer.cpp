@@ -78,7 +78,7 @@ bool Gamer::isPlaying() {
     bool hodn = false;
     pthread_mutex_lock(&mutPlay);
     hodn = playing;
-    pthread_mutex_lock(&mutPlay);
+    pthread_mutex_unlock(&mutPlay);
     return hodn;
 }
 
