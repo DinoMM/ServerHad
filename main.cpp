@@ -112,17 +112,89 @@ int main(int argc, char *argv[]) {
 
 
 
-    //vyhodnotenie vysledkov z hry?
-
-
-
     printf("Pred Finalny koniec spojenia\n");
     if (hrac1->getSuccConnection()) {
         pthread_join(tHrac1, NULL);
     }
+    printf("Medzi Finalny koniec spojenia\n");
     if (hrac2->getSuccConnection()) {
         pthread_join(tHrac2, NULL);
     }
+    printf("Po Finalny koniec spojenia\n");
+
+    //vyhodnotenie vysledkov z hry
+    run = true;
+    bool vysledokHrac1 = false;
+    bool vysledokHrac2 = false;
+    while (run) {               //ziskanie a kontrola ziskaneho score
+        vysledokHrac1 = hrac1->getScore() != -1;
+        vysledokHrac2 = hrac2->getScore() != -1;
+
+        if (vysledokHrac1 && vysledokHrac2) {
+            run = false;
+        }
+
+        if (!vysledokHrac1) {
+            bzero(msg, MSG_LEN);
+            status = read(hrac1->getNewsockfd(), msg, MSG_LEN);       //citanie zo socketu (cakanie) mozno zmenit pocet prijimanych bytov
+            if (status < 0) {
+                perror("Error reading from socket1\n");
+                return NULL;
+            }
+            switch (msg[1]) {
+                case 'H':
+                    if (msg[3] != '\0') {
+                        int doc = msg[3] - '0';     //;ebo msg si vymazem aj s hodnotou po tomto
+                        bzero(msg, MSG_LEN);
+                        msg[1] = 'Y';
+                        status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
+                        //printf("Posielanie H na socket %d\n", hrac->getNewsockfd());
+                        if (status < 0) {
+                            if (errno == EPIPE) {
+                                break;
+                            }
+                            perror("Error writing to socket\n");
+                            return NULL;
+                        }
+                        hrac1->setScore(doc);
+                    }
+                    break;
+                default: break;
+            }
+        }
+        if (!vysledokHrac2) {
+            bzero(msg, MSG_LEN);
+            status = read(hrac2->getNewsockfd(), msg, MSG_LEN);       //citanie zo socketu (cakanie) mozno zmenit pocet prijimanych bytov
+            if (status < 0) {
+                perror("Error reading from socket1\n");
+                return NULL;
+            }
+            switch (msg[1]) {
+                case 'H':
+                    if (msg[3] != '\0') {
+                        int doc = msg[3] - '0';     //;ebo msg si vymazem aj s hodnotou po tomto
+                        bzero(msg, MSG_LEN);
+                        msg[1] = 'Y';
+                        status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
+                        //printf("Posielanie H na socket %d\n", hrac->getNewsockfd());
+                        if (status < 0) {
+                            if (errno == EPIPE) {
+                                break;
+                            }
+                            perror("Error writing to socket\n");
+                            return NULL;
+                        }
+                        hrac2->setScore(doc);
+                    }
+                    break;
+                default: break;
+            }
+        }
+
+    }
+
+    printf("Score Hraca 1: %d  Score Hraca 2: %d\n", hrac1->getScore(), hrac2->getScore());
+
     printf("Finalny koniec spojenia\n");
 
     pthread_mutex_destroy(&mutKonec);

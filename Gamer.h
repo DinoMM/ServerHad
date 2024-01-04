@@ -30,6 +30,7 @@ private:
     pthread_t * thread;
     pthread_mutex_t * mutSmer;
     pthread_mutex_t * mutKoniec;
+    int score;
 
 
 public:
@@ -45,6 +46,9 @@ public:
     int getSockfd();
     bool * getKoniecZberu();
     bool getSuccConnection();
+    int getScore();
+
+    void setScore(int newScore);
 
     bool connection();
     void startConnection();
@@ -95,6 +99,22 @@ public:
                     *hrac->getKoniecZberu() = true;                     //kriticka cast
                     pthread_mutex_unlock(hrac->getMutexKoniec());
                     //printf("Zaznamenane E\n");
+                    break;
+                case 'H':
+                    if (buffer[3] != '\0') {
+                        bzero(msg, MSG_LEN);
+                        msg[1] = 'Y';
+                        status = write(hrac->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
+                        //printf("Posielanie H na socket %d\n", hrac->getNewsockfd());
+                        if (status < 0) {
+                            if (errno == EPIPE) {
+                                break;
+                            }
+                            perror("Error writing to socket\n");
+                            return NULL;
+                        }
+                        hrac->setScore(buffer[3] - '0');
+                    }
                     break;
                 default: break;
             }

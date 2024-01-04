@@ -11,6 +11,7 @@ Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mu
     this->aktSmer = 'w';
     this->port = port;
     this->koniecZberu = koniecZberu;
+    this->score = -1;
 
     succConnection = connection();
 
@@ -57,6 +58,13 @@ bool * Gamer::getKoniecZberu() {
 }
 bool Gamer::getSuccConnection() {
     return succConnection;
+}
+int Gamer::getScore() {
+    return this->score;
+}
+
+void Gamer::setScore(int newScore) {
+    this->score = newScore;
 }
 
 bool Gamer::connection() {
