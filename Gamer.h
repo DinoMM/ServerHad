@@ -110,10 +110,6 @@ public:
 
             switch (buffer[1]) {        //spracovanie specialnych stavov (eventy v hre)
                 case 'E':       // pre stav ukoncenia hry (narazenie, ukoncenie hracom)
-                    /*pthread_mutex_lock(hrac->getMutexKoniec());
-                    *hrac->getKoniecZberu() = true;                     //kriticka cast
-                    pthread_mutex_unlock(hrac->getMutexKoniec());*/
-
                     pthread_mutex_lock(hrac->getMutexPlay());
                     hrac->playing = false;                     //kriticka cast
                     pthread_mutex_unlock(hrac->getMutexPlay());
@@ -134,9 +130,7 @@ public:
                             return NULL;
                         }
                         hrac->setScore(buffer[3] - '0');
-                        /*pthread_mutex_lock(hrac->getMutexKoniec());
-                        *hrac->getKoniecZberu() = true;                     //kriticka cast
-                        pthread_mutex_unlock(hrac->getMutexKoniec());*/
+
                         pthread_mutex_lock(hrac->getMutexPlay());
                         hrac->playing = false;                     //kriticka cast
                         pthread_mutex_unlock(hrac->getMutexPlay());
@@ -159,16 +153,6 @@ public:
             }
             pthread_mutex_unlock(hrac->getMutexKoniec());
             bzero(msg, MSG_LEN);
-
-            /*if (!run) {
-                msg[1] = 'E';
-                status = write(hrac->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie klientovi
-                //printf("Posielanie E na socket %d\n", hrac->getNewsockfd());
-                if (status < 0) {
-                    perror("Error writing to socket\n");
-                    return NULL;
-                }
-            }*/
 
         }
         return NULL;

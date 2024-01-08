@@ -140,15 +140,15 @@ int main(int argc, char *argv[]) {
 
 
 
-    printf("Pred Finalny koniec spojenia\n");
+    //printf("Pred Finalny koniec spojenia\n");
     if (hrac1->getSuccConnection()) {
         pthread_join(tHrac1, NULL);
     }
-    printf("Medzi Finalny koniec spojenia\n");
+    //printf("Medzi Finalny koniec spojenia\n");
     if (hrac2->getSuccConnection()) {
         pthread_join(tHrac2, NULL);
     }
-    printf("Po Finalny koniec spojenia\n");
+    //printf("Po Finalny koniec spojenia\n");
 
     //vyhodnotenie vysledkov z hry
     run = true;
