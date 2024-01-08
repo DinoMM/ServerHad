@@ -22,6 +22,9 @@ class Gamer {
 private:
     ///w-hore, s-dole, a-vlavo, d-vpravo
     char aktSmer;
+    char fruitRow;
+    char fruitCol;
+
     int port;
     int newsockfd;
     int sockfd;
@@ -29,6 +32,7 @@ private:
     bool succConnection;
     pthread_t * thread;
     pthread_mutex_t * mutSmer;
+    pthread_mutex_t * mutFruit;
     pthread_mutex_t * mutKoniec;
     pthread_mutex_t mutPlay;
     int score;
@@ -36,14 +40,18 @@ private:
 
 
 public:
-    Gamer(pthread_t * vlakno, pthread_mutex_t * mutSmer, pthread_mutex_t * mutKoniec, int port, bool * koniecZberu);
+    Gamer(pthread_t * vlakno, pthread_mutex_t * mutSmer, pthread_mutex_t * mutKoniec, pthread_mutex_t * mutFruit,  int port, bool * koniecZberu);
     ~Gamer();
 
     char getAktSmer();
     void setAktSmer(char novySmer);
+    char getFruitRow();
+    char getFruitCol();
+    void setFruit(char fRow, char fCol);
     pthread_mutex_t * getMutexSmer();
     pthread_mutex_t * getMutexKoniec();
     pthread_mutex_t * getMutexPlay();
+    pthread_mutex_t * getMutexFruit();
     pthread_t * getThread();
     int getNewsockfd();
     int getSockfd();
@@ -133,6 +141,15 @@ public:
                         hrac->playing = false;                     //kriticka cast
                         pthread_mutex_unlock(hrac->getMutexPlay());
                     }
+                    break;
+                default: break;
+            }
+            switch (buffer[6]) {
+                case 'F':
+                    //printf("Fruit %d: %c  %c\n", hrac->newsockfd, buffer[7], buffer[8]);
+                    pthread_mutex_lock(hrac->getMutexFruit());
+                    hrac->setFruit(buffer[7], buffer[8]);
+                    pthread_mutex_unlock(hrac->getMutexFruit());
                     break;
                 default: break;
             }

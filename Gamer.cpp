@@ -4,7 +4,7 @@
 
 #include "Gamer.h"
 
-Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mutKoniec, int port, bool * koniecZberu) {
+Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mutKoniec,  pthread_mutex_t * mutFruit, int port, bool * koniecZberu) {
     this->thread = thread;
     this->mutSmer = mutSmer;
     this->mutKoniec = mutKoniec;
@@ -12,6 +12,10 @@ Gamer::Gamer(pthread_t * thread, pthread_mutex_t * mutSmer, pthread_mutex_t * mu
     this->port = port;
     this->koniecZberu = koniecZberu;
     this->score = -1;
+    this->mutFruit = mutFruit;
+
+    this->fruitRow = '0';
+    this->fruitCol = '0';
 
     pthread_mutex_init(&mutPlay, NULL);
     playing = true;
@@ -47,6 +51,9 @@ pthread_mutex_t * Gamer::getMutexSmer() {
 pthread_mutex_t * Gamer::getMutexKoniec() {
     return this->mutKoniec;
 }
+pthread_mutex_t * Gamer::getMutexFruit() {
+    return this->mutFruit;
+}
 pthread_t * Gamer::getThread() {
     return this->thread;
 }
@@ -72,6 +79,17 @@ pthread_mutex_t * Gamer::getMutexPlay() {
 
 void Gamer::setScore(int newScore) {
     this->score = newScore;
+}
+
+char Gamer::getFruitRow(){
+    return this->fruitRow;
+}
+char Gamer::getFruitCol() {
+    return this->fruitCol;
+}
+void Gamer::setFruit(char fRow, char fCol) {
+    this->fruitRow = fRow;
+    this->fruitCol = fCol;
 }
 
 bool Gamer::isPlaying() {

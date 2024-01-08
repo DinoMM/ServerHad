@@ -18,16 +18,20 @@ int main(int argc, char *argv[]) {
     pthread_mutex_t mutKonec;
     pthread_mutex_t mutSmer1;
     pthread_mutex_t mutSmer2;
+    pthread_mutex_t mutFruit1;
+    pthread_mutex_t mutFruit2;
     pthread_mutex_init(&mutKonec, NULL);
     pthread_mutex_init(&mutSmer1, NULL);
     pthread_mutex_init(&mutSmer2, NULL);
+    pthread_mutex_init(&mutFruit1, NULL);
+    pthread_mutex_init(&mutFruit2, NULL);
     pthread_t tHrac1;
     pthread_t tHrac2;
 
     signal(SIGPIPE, SIG_IGN);       //potlacuje error ked sa jeden hrac odpoji tak aby nepadol program - je potrebne cez errno okontrolovat ci je tomu naozaj tak
 
-    Gamer * hrac1 = new Gamer(&tHrac1, &mutSmer1, &mutKonec, uniPort, &koniecZberu);
-    Gamer * hrac2 = new Gamer(&tHrac2, &mutSmer2, &mutKonec, uniPort + 1, &koniecZberu);
+    Gamer * hrac1 = new Gamer(&tHrac1, &mutSmer1, &mutKonec, &mutFruit1, uniPort, &koniecZberu);
+    Gamer * hrac2 = new Gamer(&tHrac2, &mutSmer2, &mutKonec,&mutFruit2, uniPort + 1, &koniecZberu);
 
     while (true) {
         if (hrac1->getSuccConnection() && hrac2->getSuccConnection()) {
@@ -45,10 +49,19 @@ int main(int argc, char *argv[]) {
         while (run) {
 
                 bzero(msg, MSG_LEN);
+
                 pthread_mutex_lock(&mutSmer1);      //hrac1 input pre hraca2
                 msg[2] = hrac1->getAktSmer();   //kriticka cast
                 pthread_mutex_unlock(&mutSmer1);
+                pthread_mutex_lock(&mutFruit1);
+                msg[7] = hrac1->getFruitRow();
+                msg[8] = hrac1->getFruitCol();
+                pthread_mutex_unlock(&mutFruit1);
+                msg[6] = 'F';
                 msg[5] = 'M';
+                if (!hrac1->isPlaying()) {      //ak hrac uz nehra
+                    msg[2] = 'X';
+                }
                 status = write(hrac2->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
                 if (status < 0) {
                     if (errno == EPIPE) {
@@ -67,7 +80,15 @@ int main(int argc, char *argv[]) {
             pthread_mutex_lock(&mutSmer2);  //hrac2 input pre hraca1
             msg[2] = hrac2->getAktSmer();   //kriticka cast
             pthread_mutex_unlock(&mutSmer2);
+            pthread_mutex_lock(&mutFruit2);
+            msg[7] = hrac2->getFruitRow();
+            msg[8] = hrac2->getFruitCol();
+            pthread_mutex_unlock(&mutFruit2);
+            msg[6] = 'F';
             msg[5] = 'M';
+            if (!hrac2->isPlaying()) {      //ak hrac uz nehra
+                msg[2] = 'X';
+            }
             status = write(hrac1->getNewsockfd(), msg, MSG_LEN);        //poslanie informacie druhemu klientovi
             if (status < 0) {
                 if (errno == EPIPE) {
@@ -91,7 +112,7 @@ int main(int argc, char *argv[]) {
             usleep(1000 * 1000);      //tick kazdych:- 33 ms (30 fps) - 100 ms (10 fps)
         }
 
-        usleep(150 * 1000);         
+        usleep(150 * 1000);
         printf("Posielanie ukoncenia hry hracom\n");
         //oznamenie hracom ze hra sa skoncila
         bzero(msg, MSG_LEN);
@@ -259,6 +280,8 @@ int main(int argc, char *argv[]) {
     pthread_mutex_destroy(&mutKonec);
     pthread_mutex_destroy(&mutSmer1);
     pthread_mutex_destroy(&mutSmer2);
+    pthread_mutex_destroy(&mutFruit1);
+    pthread_mutex_destroy(&mutFruit2);
     free(hrac1);
     free(hrac2);
 
